@@ -19,3 +19,146 @@ public class Bus {
         this.penumpangBerdiri = new ArrayList<>();
         this.totalPendapatan = 0;
     }
+
+public List<Penumpang> getPenumpangBiasa() { return penumpangBiasa; }
+    public List<Penumpang> getPenumpangPrioritas() { return penumpangPrioritas; }
+    public List<Penumpang> getPenumpangBerdiri() { return penumpangBerdiri; }
+    public int getJumlahPenumpangBiasa() { return penumpangBiasa.size(); }
+    public int getJumlahPenumpangPrioritas() { return penumpangPrioritas.size(); }
+    public int getJumlahPenumpangBerdiri() { return penumpangBerdiri.size(); }
+
+    public int getTotalPenumpang() {
+        return getJumlahPenumpangBiasa() + getJumlahPenumpangPrioritas() + getJumlahPenumpangBerdiri();
+    }
+
+    public boolean naikkanPenumpang(Penumpang penumpang) {
+        if (getTotalPenumpang() >= MAX_KAPASITAS) {
+            System.out.println("Penumpang GAGAL naik. Bus sudah penuh (Kapasitas Maks. 40 orang).");
+            return false;
+        }
+
+        if (penumpang.getSaldo() < ONGKOS_BUS) {
+            System.out.println("Penumpang GAGAL naik. Saldo tidak mencukupi (Ongkos: " + ONGKOS_BUS + "). Saldo: " + penumpang.getSaldo());
+            return false;
+        }
+
+        boolean berhasilNaik = false;
+        
+        if (penumpang.isPrioritas()) {
+            if (getJumlahPenumpangPrioritas() < MAX_KURSI_PRIORITAS) {
+                penumpangPrioritas.add(penumpang);
+                System.out.println(penumpang.getNama() + " berhasil naik dan duduk di KURSI PRIORITAS.");
+                berhasilNaik = true;
+            } 
+            else if (getJumlahPenumpangBiasa() < MAX_KURSI_BIASA) {
+                penumpangBiasa.add(penumpang);
+                System.out.println(penumpang.getNama() + " berhasil naik dan duduk di KURSI BIASA (Prioritas penuh).");
+                berhasilNaik = true;
+            }
+            else if (getJumlahPenumpangBerdiri() < MAX_BERDIRI) {
+                penumpangBerdiri.add(penumpang);
+                System.out.println(penumpang.getNama() + " berhasil naik, namun HARUS BERDIRI."); 
+                berhasilNaik = true;
+            }
+        } else {
+            if (getJumlahPenumpangBiasa() < MAX_KURSI_BIASA) {
+                penumpangBiasa.add(penumpang);
+                System.out.println(penumpang.getNama() + " berhasil naik dan duduk di KURSI BIASA.");
+                berhasilNaik = true;
+            }
+            else if (getJumlahPenumpangBerdiri() < MAX_BERDIRI) {
+                penumpangBerdiri.add(penumpang);
+                System.out.println(penumpang.getNama() + " berhasil naik, namun HARUS BERDIRI."); 
+                berhasilNaik = true;
+            } 
+        }
+
+    if (berhasilNaik) {
+            penumpang.kurangiSaldo(ONGKOS_BUS);
+            totalPendapatan += ONGKOS_BUS; 
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean turunkanPenumpang(String nama) {
+        Penumpang p;
+        for (int i = 0; i < penumpangBiasa.size(); i++) {
+            p = penumpangBiasa.get(i);
+            if (p.getNama().equalsIgnoreCase(nama)) {
+                penumpangBiasa.remove(i);
+                System.out.println(nama + " berhasil turun dari Kursi Biasa.");
+                return true;
+            }
+        }
+
+        for (int i = 0; i < penumpangPrioritas.size(); i++) {
+            p = penumpangPrioritas.get(i);
+            if (p.getNama().equalsIgnoreCase(nama)) {
+                penumpangPrioritas.remove(i);
+                System.out.println(nama + " berhasil turun dari Kursi Prioritas.");
+                return true;
+            }
+        }
+        
+        for (int i = 0; i < penumpangBerdiri.size(); i++) {
+            p = penumpangBerdiri.get(i);
+            if (p.getNama().equalsIgnoreCase(nama)) {
+                penumpangBerdiri.remove(i);
+                System.out.println(nama + " berhasil turun dari Penumpang Berdiri.");
+                return true;
+            }
+        }
+
+        System.out.println("Penumpang dengan nama " + nama + " TIDAK ditemukan!");
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("\n=== STATISTIK BUS TRANS KOETARADJA ===\n");
+        
+        sb.append("Penumpang Biasa (Kursi: ").append(getJumlahPenumpangBiasa()).append("/").append(MAX_KURSI_BIASA).append("): ");
+        if (penumpangBiasa.isEmpty()) {
+            sb.append("<kosong>\n");
+        } else {
+            for (Penumpang p : penumpangBiasa) {
+                sb.append(p.getNama()).append(", ");
+            }
+            sb.setLength(sb.length() - 2); 
+            sb.append("\n");
+        }
+
+        sb.append("Penumpang Prioritas (Kursi: ").append(getJumlahPenumpangPrioritas()).append("/").append(MAX_KURSI_PRIORITAS).append("): ");
+        if (penumpangPrioritas.isEmpty()) {
+            sb.append("<kosong>\n");
+        } else {
+            for (Penumpang p : penumpangPrioritas) {
+                sb.append(p.getNama()).append(", ");
+            }
+            sb.setLength(sb.length() - 2); 
+            sb.append("\n");
+        }
+
+        sb.append("Penumpang Berdiri (Jumlah: ").append(getJumlahPenumpangBerdiri()).append("/").append(MAX_BERDIRI).append("): ");
+        if (penumpangBerdiri.isEmpty()) {
+            sb.append("<kosong>\n");
+        } else {
+            for (Penumpang p : penumpangBerdiri) {
+                sb.append(p.getNama()).append(", ");
+            }
+            sb.setLength(sb.length() - 2); 
+            sb.append("\n");
+        }
+        
+        sb.append("\n----------------------------------------\n");
+        sb.append("Total Jumlah Penumpang: ").append(getTotalPenumpang()).append(" / ").append(MAX_KAPASITAS).append("\n");
+        sb.append("Total Pendapatan Bus: ").append(totalPendapatan).append(" IDR\n");
+        sb.append("========================================\n");
+        
+        return sb.toString();
+    }
+}
